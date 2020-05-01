@@ -1,4 +1,5 @@
 import json
+from os import system
 
 
 class Login:
@@ -7,19 +8,23 @@ class Login:
         print('Bem vindo\n')
 
         while True:
-            opc = int(input('[1] - Sign in\n [2] - Sign Up\n[3] - Exit\n'))
+            print('[1] - Sign in\n[2] - Sign Up\n[3] - Exit\n')
+            opc = int(input('Escolha: '))
 
             if opc not in (1, 2, 3):
+                system('clear')
                 continue
 
             if opc == 1:
-                pass
+                system('clear')
+                self.sign_in()
 
             elif opc == 2:
-                pass
+                system('clear')
+                self.sign_up()
 
             else:
-                pass
+                break
 
     def sign_up(self):
         while True:
@@ -34,7 +39,9 @@ class Login:
                 continue
 
             while True:
-                print('Confirme suas informações')
+                system('clear')
+
+                print('\nConfirme suas informações')
                 print(f'Nome: {name}\nIdade: {idade}\nEmail: {email}')
                 opc = int(input('[1] - Prosseguir\n[2] - Refazer cadastro\n'))
 
@@ -44,11 +51,27 @@ class Login:
                 if opc == 2:
                     return
 
-                dic[name] = {}
-                dic[name].update({'email': email, 'idade': idade})
+                dic = {}
+                dic[email] = {}
+                dic[email].update(
+                    {'nome': name, 'idade': idade, 'senha': senha})
+
+                self.save_json(dic)
+                print('Inscrito com sucesso.')
+                return
 
     def sign_in(self):
-        pass
+        email = input('Email: ')
+        senha = input('Senha: ')
+
+        login = self.checkLogin(email, senha)
+
+        system('clear')
+        if login:
+            print('Você está cadastrado.')
+
+        else:
+            print('Credenciais incorretas.')
 
     def save_json(self, dic):
 
@@ -58,8 +81,8 @@ class Login:
             # Ler o json existente no arquivo
             json_atual = file.read()
 
+            # Ver se o arquivo não está vazio
             if json_atual:
-
                 # Converter o json do arquivo em dicionario
                 dic_atual = json.loads(json_atual)
 
@@ -73,3 +96,28 @@ class Login:
             file.truncate()
 
             file.write(json.dumps(dic_atual, indent=True))
+
+    def checkLogin(self, email, password):
+
+        with open('cadastros.json', 'a+') as file:
+            file.seek(0, 0)
+
+            dic = file.read()
+
+            if dic:
+
+                dic_atual = json.loads(dic)
+
+                if email not in dic_atual:
+                    return False
+
+                if password != dic_atual[email]['senha']:
+                    return False
+
+                file.seek(0, 0)
+                return True
+
+            else:
+                print('Não há usuários cadastrados.')
+
+            file.seek(0, 0)
